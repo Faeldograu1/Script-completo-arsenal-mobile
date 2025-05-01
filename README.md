@@ -1,4 +1,4 @@
---[[ Arsenal Hack Completo para Delta Executor Mobile ]]--
+--[[ Arsenal Hack sem Auto Kill e Fly ]]--
 
 -- Serviços e inicialização
 local Players = game:GetService("Players")
@@ -10,9 +10,6 @@ local LocalPlayer = Players.LocalPlayer
 local AimbotEnabled = false
 local ESPEnabled = false
 local TeamCheck = true
-local AutoKillEnabled = false
-local FlyEnabled = false
-local Flying = false
 
 -- GUI principal
 local gui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
@@ -20,7 +17,7 @@ gui.Name = "ArsenalHackUI"
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 260, 0, 360)
+frame.Size = UDim2.new(0, 260, 0, 300)
 frame.Position = UDim2.new(0.05, 0, 0.1, 0)
 frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 frame.BorderSizePixel = 0
@@ -54,46 +51,24 @@ end
 createToggle("Aimbot", function(val) AimbotEnabled = val end)
 createToggle("ESP", function(val) ESPEnabled = val end)
 createToggle("Team Check", function(val) TeamCheck = val end)
-createToggle("Auto Kill", function(val) AutoKillEnabled = val end)
-createToggle("Fly", function(val)
-    FlyEnabled = val
-    Flying = val
-end)
 
--- Minimizar
-local minimize = Instance.new("TextButton", gui)
-minimize.Size = UDim2.new(0, 60, 0, 30)
-minimize.Position = UDim2.new(0.05, 0, 0.45, 0)
-minimize.Text = "Min/Max"
-minimize.Font = Enum.Font.Gotham
-minimize.TextSize = 14
-minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
-minimize.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+-- Botão flutuante fora da interface para minimizar
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Parent = gui
+minimizeBtn.Size = UDim2.new(0, 80, 0, 30)
+minimizeBtn.Position = UDim2.new(0, 10, 0, 10)
+minimizeBtn.Text = "Menu"
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Font = Enum.Font.Gotham
+minimizeBtn.TextSize = 14
+minimizeBtn.AutoButtonColor = true
 
-Instance.new("UICorner", minimize).CornerRadius = UDim.new(0, 8)
+local minimizeCorner = Instance.new("UICorner", minimizeBtn)
+minimizeCorner.CornerRadius = UDim.new(0, 8)
 
-minimize.MouseButton1Click:Connect(function()
+minimizeBtn.MouseButton1Click:Connect(function()
     frame.Visible = not frame.Visible
-end)
-
--- Fly
-local velocity = Instance.new("BodyVelocity")
-velocity.Velocity = Vector3.zero
-velocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-
-RunService.RenderStepped:Connect(function()
-    if FlyEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        velocity.Parent = LocalPlayer.Character.HumanoidRootPart
-        local move = Vector3.zero
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then move += Camera.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then move -= Camera.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then move -= Camera.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then move += Camera.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move += Vector3.new(0, 1, 0) end
-        velocity.Velocity = move.Unit * 50
-    else
-        velocity.Parent = nil
-    end
 end)
 
 -- Funções de combate
@@ -120,16 +95,6 @@ RunService.RenderStepped:Connect(function()
         local target = getClosestEnemy()
         if target and target.Character and target.Character:FindFirstChild("Head") then
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
-        end
-    end
-    if AutoKillEnabled then
-        local target = getClosestEnemy()
-        if target and target.Character and target.Character:FindFirstChild("Head") then
-            local args = {
-                [1] = target.Character.Head.Position,
-                [2] = target.Character.Head
-            }
-            game:GetService("ReplicatedStorage").Events.HitPart:FireServer(unpack(args))
         end
     end
 end)
